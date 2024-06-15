@@ -17,31 +17,38 @@
         }
 
         .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             text-align: center;
             max-width: 600px;
             padding: 20px;
             background-color: #f0f0f0;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            margin-top: auto; /* Pushes container to the top */
         }
 
         .image-container {
-            width: 100%;
-            max-width: 600px;
-            height: auto;
+            width: 300px;
+            height: 300px;
             border: 2px solid #ccc;
             display: flex;
             justify-content: center;
             align-items: center;
-            margin-bottom: 20px;
             overflow: hidden;
+            background-color: #fff;
+            margin-bottom: 20px;
+            transition: border-radius 0.3s ease;
+        }
+
+        .image-container.circle {
+            border-radius: 50%;
         }
 
         .image-container img, .image-container video {
             width: 100%;
-            height: auto;
-            object-fit: contain;
+            height: 100%;
+            object-fit: cover;
         }
 
         form {
@@ -81,86 +88,60 @@
             <button type="submit">Upload</button>
         </form>
 
-        <!-- Container for displaying uploaded image or video -->
         <div class="image-container" id="imageContainer">
             <!-- JavaScript will dynamically add the uploaded image or video here -->
         </div>
     </div>
 
-    <!-- Script to display uploaded image or video -->
     <script>
-        // Function to display the selected image or video
         document.getElementById('file').addEventListener('change', function() {
             const file = this.files[0];
             if (file) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     const fileExtension = file.name.split('.').pop().toLowerCase();
+                    const imageContainer = document.getElementById('imageContainer');
                     if (['mp4', 'mov', 'avi'].includes(fileExtension)) {
+                        imageContainer.classList.remove('circle');
                         displayVideo(e.target.result);
                     } else {
+                        imageContainer.classList.add('circle');
                         displayImage(e.target.result);
                     }
-                    localStorage.setItem('uploadedImageOrVideo', e.target.result);
                 };
                 reader.readAsDataURL(file);
             }
         });
 
-        // Function to display an image
         function displayImage(src) {
             const imgElement = document.createElement('img');
             imgElement.src = src;
             imgElement.alt = 'Uploaded Image';
-            imgElement.onload = function() {
-                const imageContainer = document.getElementById('imageContainer');
-                clearContainer(imageContainer);
-                if (imgElement.width > imgElement.height) {
-                    imgElement.style.height = '100%';
-                    imgElement.style.width = 'auto';
-                } else {
-                    imgElement.style.width = '100%';
-                    imgElement.style.height = 'auto';
-                }
-                imageContainer.appendChild(imgElement);
-            };
+            const imageContainer = document.getElementById('imageContainer');
+            clearContainer(imageContainer);
+            imageContainer.appendChild(imgElement);
         }
 
-        // Function to display a video
         function displayVideo(src) {
             const videoElement = document.createElement('video');
             videoElement.src = src;
-            videoElement.type = 'video/mp4'; // Assuming mp4 for simplicity
+            videoElement.type = 'video/mp4';
             videoElement.autoplay = true;
             videoElement.loop = true;
             videoElement.controls = true;
             videoElement.style.width = '100%';
-            videoElement.style.height = 'auto';
-            videoElement.style.objectFit = 'contain';
+            videoElement.style.height = '100%';
+            videoElement.style.objectFit = 'cover';
             const imageContainer = document.getElementById('imageContainer');
             clearContainer(imageContainer);
             imageContainer.appendChild(videoElement);
         }
 
-        // Function to clear the container
         function clearContainer(container) {
             while (container.firstChild) {
                 container.removeChild(container.firstChild);
             }
         }
-
-        // Check if there's a previously uploaded image or video in local storage and display it
-        window.onload = function() {
-            const uploadedMedia = localStorage.getItem('uploadedImageOrVideo');
-            if (uploadedMedia) {
-                const fileExtension = uploadedMedia.split(';')[0].split('/')[1];
-                if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExtension)) {
-                    displayImage(uploadedMedia);
-                } else if (['mp4', 'mov', 'avi'].includes(fileExtension)) {
-                    displayVideo(uploadedMedia);
-                }
-            }
-        };
     </script>
 </body>
 </html>
